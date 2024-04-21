@@ -1,38 +1,25 @@
 import React, { Component } from 'react';
-import { SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, useColorScheme, View } from 'react-native';
-import Section from './components/Section';
+import { SafeAreaView, StyleSheet, Text } from "react-native";
+import NormalCamera from './components/NormalCamera';
 
 import * as handPoseDetection from '@tensorflow-models/hand-pose-detection';
 import * as tf from '@tensorflow/tfjs-core';
+
 // Register WebGL backend.
 import '@tensorflow/tfjs-backend-webgl';
 
-interface AppProps {}
-interface AppState {}
+interface AppProps {};
+interface AppState {};
 
 class App extends Component<AppProps, AppState> {
 	constructor(props: AppProps) {
 		super(props);
 		this.state = {};
 	}
-	
 
 	public render() {
-		return <SafeAreaView>
-			<StatusBar barStyle="dark-content"/>
-			<ScrollView contentInsetAdjustmentBehavior="automatic">
-				<View>
-					<Section title="Step One">
-						SLKJF:LKSDJFLKSDJLFKJDSLKFJSLDKF
-					</Section>
-					<Section title="See Your Changes"></Section>
-					<Section title="Debug"></Section>
-					<Section title="Learn More">
-						Read the docs to discover what to do next:
-					</Section>
-				</View>
-			</ScrollView>
-		</SafeAreaView>;
+		console.log("Rendering!");
+		return <NormalCamera></NormalCamera>
 	}
 }
 
