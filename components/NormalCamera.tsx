@@ -2,6 +2,7 @@ import * as React from "react";
 import {Component} from "react";
 import { SafeAreaView, StyleSheet, Text } from "react-native";
 import { Camera, CameraDevice, Frame, useCameraDevice } from "react-native-vision-camera";
+import HandPetRecognizer from "../lib/HandModel";
 
 interface NormalCameraProps {}
 interface NormalCameraState {}
@@ -10,10 +11,13 @@ export default class NormalCamera extends Component<NormalCameraProps, NormalCam
 	private device: CameraDevice | undefined;
 	private cam: React.RefObject<Camera>;
 
+	private handpet: HandPetRecognizer;
+
 	constructor(props: NormalCameraProps) {
 		super(props);
 		this.state = {};
 
+		this.handpet = new HandPetRecognizer();
 		
 		this.cam = React.createRef();
 		this.initCamera.bind(this)();
@@ -28,8 +32,10 @@ export default class NormalCamera extends Component<NormalCameraProps, NormalCam
 		this.setState({});
 	}
 
-	private frameProcessor(frame: Frame) {
-
+	private async frameProcessor(frame: Frame) {
+		console.log("slkdj");
+		let score = await this.handpet.processImage(new Uint8Array(frame.toArrayBuffer()));
+		console.log("YOUR SCORE: ", score);
 	}
 
 	public render() {
