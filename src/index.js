@@ -111,8 +111,11 @@ function endEstimateHandsStats() {
   }
 }
 
-var startTime, endTime;
-var badPosture;
+var startTime = new Date()
+var endTime;
+var past_pos_x, curr_pos_x = 0
+var past_pos_y, curr_pos_y = 0
+var past_pos_z, curr_pos_z = 0
 var soundPlayer = new Audio('https://soundbible.com/mp3/glass_ping-Go445-1207030150.mp3');
 async function renderResult() {
   if (camera.video.readyState < 2) {
@@ -151,45 +154,40 @@ async function renderResult() {
   // The null check makes sure the UI is not in the middle of changing to a
   // different model. If during model change, the result is from an old model,
   // which shouldn't be rendered.
-  let degOut = document.getElementById("degree-output");
-  let timeOut = document.getElementById("bad-posture");
+  let coordsOut = document.getElementById("coords");
+  let directionOut = document.getElementById("direction");
+  let intervalTimeInSeconds = 0.5
+  let threshold = 0.005  
+  let direction = ""
+  
+  let velocity_x, velocity_y, velocity_z = 0;
+
   if (hands && hands.length > 0 && !STATE.isModelChanged) {
     camera.drawResults(hands);
-    let degree = degreePoints(hands, 0, 9);
-    degree = degree.toFixed(5);
-    if (degree >= 30) {
-      if (badPosture) {
-        endTime = new Date();
-        var timeDiff = (endTime - startTime) / 1000;
-        timeDiff = timeDiff.toFixed(3);
-        timeOut.innerHTML = `Bad posture held for: ${timeDiff}`;
-        if (timeDiff >= 5) {
-          console.log("uh oh spaghettio");
-          soundPlayer.play()
-        }
+
+    let point = hands[0].keypoints3D[0]
+    curr_pos_x = point.x
+    curr_pos_y = point.y
+
+    if ( (new Date() - startTime) / 1000 > intervalTimeInSeconds) {
+      velocity_x = Math.abs((curr_pos_x - past_pos_x)) / intervalTimeInSeconds;
+      velocity_y = Math.abs((curr_pos_y - past_pos_y)) / intervalTimeInSeconds;
+      
+      if (velocity_x > threshold || velocity_y > threshold ) {
+        direction = "moving";
       } else {
-        badPosture = true;
-        startTime = new Date();
+        direction = "not moving"
       }
-    } else {
-      badPosture = false;
-      timeOut.innerHTML = `Bad posture held for: 0`;
-      soundPlayer.pause();
-      soundPlayer.currentTime = 0;
+
+      past_pos_x = curr_pos_x
+      past_pos_y = curr_pos_y
+      past_pos_z = curr_pos_z
+      startTime = new Date();
     }
-    degOut.innerHTML = `Degree between wrist and middle knuckle: ${degree}`;
 
-    console.log(degree);
+    coordsOut.innerHTML = `(${curr_pos_x}, ${curr_pos_y}, ${curr_pos_z}), (${velocity_x}, ${velocity_y}, ${velocity_z})`
+    directionOut.innerHTML = `direction: ${direction}`
   }
-}
-
-function degreePoints(hands, num_1, num_2) {
-  let wrist = hands[0].keypoints3D[num_1];
-  let mpc = hands[0].keypoints3D[num_2];
-  let height = Math.abs(wrist.y - mpc.y);
-  let s = Math.sqrt((wrist.x - mpc.x) * (wrist.x - mpc.x)
-                    + (wrist.z - mpc.z) * (wrist.z - mpc.z));
-  return 180 / Math.PI * Math.atan(height / s);
 }
 
 async function renderPrediction() {
