@@ -112,7 +112,8 @@ function endEstimateHandsStats() {
 }
 
 var startTime = new Date()
-var endTime;
+var grassTime = new Date();
+var grassIntervalInSeconds = 10;
 var past_pos_x, curr_pos_x = 0
 var past_pos_y, curr_pos_y = 0
 var past_pos_z, curr_pos_z = 0
@@ -151,6 +152,12 @@ async function renderResult() {
 
   camera.drawCtx();
 
+  if ( (new Date() - grassTime) / 1000 > grassIntervalInSeconds) {
+    console.log("grass");
+    grassTime = new Date();
+    grassPrediction();
+  }
+
   // The null check makes sure the UI is not in the middle of changing to a
   // different model. If during model change, the result is from an old model,
   // which shouldn't be rendered.
@@ -188,6 +195,27 @@ async function renderResult() {
     coordsOut.innerHTML = `(${curr_pos_x}, ${curr_pos_y}, ${curr_pos_z}), (${velocity_x}, ${velocity_y}, ${velocity_z})`
     directionOut.innerHTML = `direction: ${direction}`
   }
+}
+
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+async function grassPrediction() {
+  // For text-and-image input (multimodal), use the gemini-pro-vision model
+  const model = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
+
+  const prompt = "is there grass in this picture? it is okay if it is obscured by a hand. please only answer yes or no. if you are not sure say no.";
+  const image = camera.canvas.toDataURL("image/jpeg");
+  const imagePart = {
+    inlineData: {
+      data: image.split(',')[1], // Extract base64 data
+      mimeType: 'image/jpeg',
+    },
+  };
+
+  const result = await model.generateContent([prompt, imagePart]);
+  const response = await result.response;
+  const text = response.text();
+  console.log(text);
 }
 
 async function renderPrediction() {
