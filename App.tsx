@@ -1,7 +1,11 @@
-import React from 'react';
-import { Component } from "react";
+import React, { Component } from 'react';
 import { SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, useColorScheme, View } from 'react-native';
 import Section from './components/Section';
+
+import * as handPoseDetection from '@tensorflow-models/hand-pose-detection';
+import * as tf from '@tensorflow/tfjs-core';
+// Register WebGL backend.
+import '@tensorflow/tfjs-backend-webgl';
 
 interface AppProps {}
 interface AppState {}
@@ -11,6 +15,7 @@ class App extends Component<AppProps, AppState> {
 		super(props);
 		this.state = {};
 	}
+	
 
 	public render() {
 		return <SafeAreaView>
